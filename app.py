@@ -1,45 +1,45 @@
 from flask import Flask, request, jsonify
-from models import Session, SeasonalFlavor, IngredientInventory, CustomerSuggestions
+from models import Session, FlavorOfTheSeason, Inventory, CustomerFeedback
 
 app = Flask(__name__)
 session = Session()
 
-@app.route('/flavors', methods=['GET'])
-def get_flavors():
-    flavors = session.query(SeasonalFlavor).all()
-    flavor_list = [{'id': flavor.id, 'flavor_name': flavor.flavor_name, 'is_available': flavor.is_available} for flavor in flavors]
-    return jsonify(flavor_list)
+@app.route('/seasonal_flavors', methods=['GET'])
+def retrieve_seasonal_flavors():
+    flavors = session.query(FlavorOfTheSeason).all()
+    result = [{'id': f.id, 'name': f.flavor_name, 'available': f.is_available} for f in flavors]
+    return jsonify(result)
 
-@app.route('/flavors', methods=['POST'])
-def add_flavor():
+@app.route('/seasonal_flavors', methods=['POST'])
+def create_seasonal_flavor():
     data = request.get_json()
-    new_flavor = SeasonalFlavor(flavor_name=data['flavor_name'], is_available=data['is_available'])
-    session.add(new_flavor)
+    flavor = FlavorOfTheSeason(flavor_name=data['name'], is_available=data['available'])
+    session.add(flavor)
     session.commit()
-    return jsonify({'message': 'Flavor added successfully'}), 201
+    return jsonify({'message': 'New flavor has been added successfully'}), 201
 
-@app.route('/ingredients/<int:id>', methods=['PUT'])
-def update_ingredient(id):
+@app.route('/inventory/<int:item_id>', methods=['PUT'])
+def update_inventory_item(item_id):
     data = request.get_json()
-    ingredient = session.query(IngredientInventory).filter_by(id=id).first()
-    if ingredient:
-        ingredient.stock_quantity = data['stock_quantity']
+    item = session.query(Inventory).filter_by(id=item_id).first()
+    if item:
+        item.stock = data['quantity']
         session.commit()
-        return jsonify({'message': 'Ingredient updated successfully'})
+        return jsonify({'message': 'Stock quantity updated successfully'})
     else:
-        return jsonify({'message': 'Ingredient not found'}), 404
+        return jsonify({'message': 'Inventory item not found'}), 404
 
-@app.route('/suggestions', methods=['POST'])
-def add_suggestion():
+@app.route('/feedback', methods=['POST'])
+def add_customer_feedback():
     data = request.get_json()
-    new_suggestion = CustomerSuggestions(
-        customer_name=data['customer_name'],
-        flavor_suggestion=data['flavor_suggestion'],
-        allergy_concern=data.get('allergy_concern')
+    feedback = CustomerFeedback(
+        customer=data['customer_name'],
+        suggestion=data['flavor_suggestion'],
+        allergy_info=data.get('allergy_concern')
     )
-    session.add(new_suggestion)
+    session.add(feedback)
     session.commit()
-    return jsonify({'message': 'Suggestion added successfully'}), 201
+    return jsonify({'message': 'Feedback has been recorded'}), 201
 
 if __name__ == '__main__':
     app.run(debug=True)
