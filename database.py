@@ -1,11 +1,10 @@
-from models import engine, Base  # Ensure these are correct
+from models import engine, Base
 import sqlite3
 
 def create_tables():
     conn = sqlite3.connect('chocolate_house.db')
     cursor = conn.cursor()
 
-    # Create table for seasonal flavors
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS seasonal_flavors (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -14,7 +13,6 @@ def create_tables():
         )
     ''')
 
-    # Create table for ingredient inventory
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS ingredient_inventory (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -23,7 +21,6 @@ def create_tables():
         )
     ''')
 
-    # Create table for customer suggestions and allergy concerns
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS customer_suggestions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -36,6 +33,6 @@ def create_tables():
     conn.commit()
     conn.close()
 
-if __name__ == '_main_':
-    create_tables()  # Create SQLite tables
-    Base.metadata.create_all(engine)  # Create all SQLAlchemy tables
+if __name__ == '__main__':
+    create_tables()
+    Base.metadata.create_all(engine)
